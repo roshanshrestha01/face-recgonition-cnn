@@ -41,7 +41,7 @@ for root, dirnames, files in os.walk(RAW_DIR):
         subjects.append(dirname)
 
 for subject in subjects:
-    for root, dirName, files in os.walk(os.path.join(RAW_DIR, subject)):
+    for root, _, files in os.walk(os.path.join(RAW_DIR, subject)):
         files.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
         if is_two_split:
             training_sets = files[:train]
