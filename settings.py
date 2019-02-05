@@ -7,3 +7,5 @@ DATA_DIR = os.path.join(BASE_DIR, 'data')
 RAW_DIR = os.path.join(DATA_DIR, 'raw')
 
 PROCESSED_DIR = os.path.join(DATA_DIR, 'processed')
+
+HAAR_CASCADE = os.path.join(BASE_DIR, 'cascade', 'haarcascade_frontalface_default.xml')
