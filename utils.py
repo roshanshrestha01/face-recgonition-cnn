@@ -11,12 +11,13 @@ def check_folder(path):
         os.makedirs(path)
 
 
-def show_image_roi(image_list):
+def show_image_roi(image_list, title='Figure'):
     if not len(image_list) == 10:
         raise ValueError('List of 10 items is required')
     for idx, im in enumerate(image_list):
         image, roi = get_roi(im)
         plt.subplot(2, 5, idx + 1)
+        plt.gca().set_title(title)
         plt.imshow(image, cmap='gray', interpolation='bicubic')
 
     plt.show()
@@ -56,7 +57,7 @@ def read_images(path, sz=None):
                     # im = im.resize(sz, Image.ANTIALIAS)
                     # img, roi = get_roi(im)
                     X.append(im)
-                    y.append(c)
+                    y.append(subdirname)
                 except IOError:
                     print("I/O error")
                 except:
