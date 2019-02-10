@@ -3,7 +3,7 @@ import cv2
 
 from matplotlib import pyplot as plt
 
-from settings import HAAR_CASCADE
+from settings import HAAR_CASCADE, RESIZE
 
 
 def check_folder(path):
@@ -40,7 +40,7 @@ def get_roi(img):
     for (x, y, w, h) in faces:
         img = cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
         roi = img[y:y + h, x:x + w]
-
+        roi = cv2.resize(roi, RESIZE)
     return img, roi
 
 
