@@ -15,6 +15,7 @@ import hmax
 
 # Initialize the model with the universal patch set
 from settings import PROCESSED_DIR, SHUFFLE_BATCH
+from transforms import HaarFaceDetect
 from utils import show_batch
 
 print('Constructing model')
@@ -24,6 +25,7 @@ model = hmax.HMAX('./hmax/universal_patch_set.mat')
 training_images = datasets.ImageFolder(
     os.path.join(PROCESSED_DIR, 'train'),
     transform=transforms.Compose([
+        HaarFaceDetect(),
         transforms.Grayscale(),
         transforms.Scale((128, 128)),
         transforms.ToTensor(),
@@ -32,7 +34,7 @@ training_images = datasets.ImageFolder(
 )
 
 # A dataloader that will run through all example images in one batch
-dataloader = DataLoader(training_images, batch_size=6, shuffle=SHUFFLE_BATCH)
+dataloader = DataLoader(training_images, batch_size=10, shuffle=SHUFFLE_BATCH)
 
 # Determine whether there is a compatible GPU available
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
