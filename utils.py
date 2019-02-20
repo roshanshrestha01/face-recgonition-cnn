@@ -1,6 +1,7 @@
 import os, sys
 import cv2
-
+import torchvision
+import numpy as np
 from matplotlib import pyplot as plt
 
 from settings import HAAR_CASCADE, RESIZE
@@ -35,7 +36,7 @@ def get_roi(img):
     # minNeighbors – Parameter specifying how many neighbors each candidate rectangle should have to retain it.
     # -  This parameter will affect the quality of the detected faces: higher value results in less
     # detections but with higher quality. We're using 1 in the code.
-    faces = face_cascade.detectMultiScale(img, 1.3, 1)
+    faces = face_cascade.detectMultiScale(img, 1.1, 5, minSize=(1, 1,))
 
     for (x, y, w, h) in faces:
         img = cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
@@ -65,3 +66,12 @@ def read_images(path, sz=None):
                     raise
             c = c + 1
     return [X, y]
+
+
+def show_batch(images, labels):
+    size = int(len(images) / 2)
+    for idx, im in enumerate(images):
+        plt.subplot(2, size, idx + 1)
+        plt.gca().set_title(str(labels[idx]))
+        plt.imshow(im[0], cmap='gray', interpolation='bicubic')
+    plt.show()

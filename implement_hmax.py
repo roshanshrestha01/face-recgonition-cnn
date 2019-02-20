@@ -1,17 +1,51 @@
-import cv2
+"""
+Run the HMAX model on the example images.
+
+Authors: Marijn van Vliet <w.m.vanvliet@gmail.com>
+"""
 import os
-import numpy as np
-from hmax import HMAX
-from settings import DATA_DIR
 
-RAW_DIR = os.path.join(DATA_DIR, 'raw')
+import torch
+from torch.utils.data import DataLoader
+from torchvision import datasets, transforms
+import pickle
+from matplotlib import pyplot as plt
+
+import hmax
+
 # Initialize the model with the universal patch set
+from settings import PROCESSED_DIR, SHUFFLE_BATCH
+from utils import show_batch
+
 print('Constructing model')
-model = HMAX('./hmax/universal_patch_set.mat')
+model = hmax.HMAX('./hmax/universal_patch_set.mat')
 
-subject_1 = cv2.imread(os.path.join(RAW_DIR, 's1', '1.pgm'), 0)
+# A folder with example images
+training_images = datasets.ImageFolder(
+    os.path.join(PROCESSED_DIR, 'train'),
+    transform=transforms.Compose([
+        transforms.Grayscale(),
+        transforms.Scale((128, 128)),
+        transforms.ToTensor(),
+        transforms.Lambda(lambda x: x * 255),
+    ])
+)
 
-batch = np.array([[subject_1]])
+# A dataloader that will run through all example images in one batch
+dataloader = DataLoader(training_images, batch_size=6, shuffle=SHUFFLE_BATCH)
 
-import ipdb
-ipdb.set_trace()
+# Determine whether there is a compatible GPU available
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
+# Run the model on the example images
+print('Running model on', device)
+model = model.to(device)
+for X, y in dataloader:
+    # selected = X[:2, :, :, :]
+    show_batch(X, y)
+    # s1, c1, s2, c2 = model.get_all_layers(X.to(device))
+
+# print('Saving output of all layers to: output.pkl')
+# with open('output.pkl', 'wb') as f:
+#     pickle.dump(dict(s1=s1, c1=c1, s2=s2, c2=c2), f)
+# print('[done]')
