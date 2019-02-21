@@ -14,7 +14,7 @@ from matplotlib import pyplot as plt
 import hmax
 
 # Initialize the model with the universal patch set
-from settings import PROCESSED_DIR, SHUFFLE_BATCH
+from settings import PROCESSED_DIR, SHUFFLE_BATCH, RESIZE
 from transforms import HaarFaceDetect
 from utils import show_batch
 
@@ -27,7 +27,7 @@ training_images = datasets.ImageFolder(
     transform=transforms.Compose([
         HaarFaceDetect(),
         transforms.Grayscale(),
-        transforms.Scale((128, 128)),
+        transforms.Scale(RESIZE),
         transforms.ToTensor(),
         transforms.Lambda(lambda x: x * 255),
     ])
