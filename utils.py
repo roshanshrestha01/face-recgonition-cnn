@@ -1,7 +1,6 @@
-import os, sys
 import cv2
-import torchvision
-import numpy as np
+import os
+import sys
 from matplotlib import pyplot as plt
 
 from settings import HAAR_CASCADE, RESIZE
@@ -68,10 +67,15 @@ def read_images(path, sz=None):
     return [X, y]
 
 
+classes = ['s1', 's10', 's11', 's12', 's13', 's14', 's15', 's16', 's17', 's18', 's19', 's2', 's20', 's21', 's22', 's23',
+           's24', 's25', 's26', 's27', 's28', 's29', 's3', 's30', 's31', 's32', 's33', 's34', 's35', 's36', 's37',
+           's38', 's39', 's4', 's40', 's5', 's6', 's7', 's8', 's9']
+
+
 def show_batch(images, labels):
     size = int(len(images) / 2)
     for idx, im in enumerate(images):
         plt.subplot(2, size, idx + 1)
-        plt.gca().set_title(str(labels[idx]))
+        plt.gca().set_title(str(classes[labels[idx]]))
         plt.imshow(im[0], cmap='gray', interpolation='bicubic')
     plt.show()

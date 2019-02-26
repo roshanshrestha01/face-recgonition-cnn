@@ -14,7 +14,7 @@ from matplotlib import pyplot as plt
 import hmax
 
 # Initialize the model with the universal patch set
-from settings import PROCESSED_DIR, SHUFFLE_BATCH, RESIZE
+from settings import PROCESSED_DIR, SHUFFLE_BATCH, RESIZE, SHOW_BATCHES
 from transforms import HaarFaceDetect
 from utils import show_batch
 
@@ -42,12 +42,17 @@ device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 # Run the model on the example images
 print('Running model on', device)
 model = model.to(device)
-for X, y in dataloader:
-    # selected = X[:2, :, :, :]
-    show_batch(X, y)
-    # s1, c1, s2, c2 = model.get_all_layers(X.to(device))
+count = 0
 
-# print('Saving output of all layers to: output.pkl')
-# with open('output.pkl', 'wb') as f:
-#     pickle.dump(dict(s1=s1, c1=c1, s2=s2, c2=c2), f)
-# print('[done]')
+if SHOW_BATCHES:
+    for X, y in dataloader:
+        count += 1
+        show_batch(X, y)
+    count = 0
+
+
+for X, y in dataloader:
+    count += 1
+    # c2 = model(X[:2, :, :, :])
+    # selected = X[:2, :, :, :]
+    # s1, c1, s2, c2 = model.get_all_layers(X.to(device))

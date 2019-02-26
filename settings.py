@@ -9,3 +9,5 @@ PROCESSED_DIR = os.path.join(DATA_DIR, 'processed')
 RESIZE = (128, 128)
 SHUFFLE_BATCH = False
 HAAR_CASCADE = os.path.join(BASE_DIR, 'cascade', 'haarcascade_frontalface_default.xml')
+
+SHOW_BATCHES = False
