@@ -16,3 +16,5 @@ SHOW_BATCHES = {
     'validate': False,
     'test': False,
 }
+
+USE_FMINST = False

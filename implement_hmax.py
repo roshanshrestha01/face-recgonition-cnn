@@ -4,6 +4,7 @@ from torch import nn, optim
 import hmax
 from dataloaders import train_dataloader
 from networks import NNetwork
+from settings import USE_FMINST
 from utils import view_classify
 
 print('Constructing model')
@@ -39,8 +40,9 @@ for _ in range(epochs):
 
 dataiter = iter(train_dataloader)
 images, labels = dataiter.next()
-img = images[0]
+img = images[1]
 
 ps = torch.exp(network(img))
 
-view_classify(img, ps, 'ORL')
+verion = 'Fashion' if USE_FMINST else 'ORL'
+view_classify(img, ps, verion)
