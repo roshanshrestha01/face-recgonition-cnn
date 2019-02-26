@@ -49,4 +49,7 @@ if USE_FMINST:
     trainset = datasets.FashionMNIST('~/.pytorch/F_MNIST_data/', download=True, train=True, transform=transform)
     train_dataloader = DataLoader(trainset, batch_size=64, shuffle=True)
 
+    testset = datasets.FashionMNIST('~/.pytorch/F_MNIST_data/', download=True, train=False, transform=transform)
+    test_dataloader = DataLoader(testset, batch_size=64, shuffle=True)
+
 
