@@ -6,13 +6,13 @@ DATA_DIR = os.path.join(BASE_DIR, 'data')
 RAW_DIR = os.path.join(DATA_DIR, 'raw')
 PROCESSED_DIR = os.path.join(DATA_DIR, 'processed')
 
-RESIZE = (128, 128)
+RESIZE = (28, 28)
 HAAR_CASCADE = os.path.join(BASE_DIR, 'cascade', 'haarcascade_frontalface_default.xml')
 
 
 SHUFFLE_BATCH = False
 SHOW_BATCHES = {
     'train': False,
-    'validate': True,
+    'validate': False,
     'test': False,
 }

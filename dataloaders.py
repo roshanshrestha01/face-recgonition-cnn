@@ -41,3 +41,12 @@ test_images = datasets.ImageFolder(
 train_dataloader = DataLoader(train_images, batch_size=10, shuffle=SHUFFLE_BATCH)
 validate_dataloader = DataLoader(validate_images, batch_size=10)
 test_dataloader = DataLoader(test_images, batch_size=10)
+
+# Fashion MNIST datasets
+
+# transform = transforms.Compose([transforms.ToTensor(),
+#                                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+# trainset = datasets.FashionMNIST('~/.pytorch/F_MNIST_data/', download=True, train=True, transform=transform)
+# train_dataloader = DataLoader(trainset, batch_size=64, shuffle=True)
+
+
