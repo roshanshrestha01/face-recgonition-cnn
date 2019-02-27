@@ -4,7 +4,7 @@ from torch import nn, optim
 import hmax
 from dataloaders import train_dataloader, test_dataloader
 from networks import NNetwork
-from settings import USE_FMINST
+from settings import USE_FMINST, USE_HMAX_NETWORK
 from utils import view_classify
 from matplotlib import pyplot as plt
 
@@ -18,7 +18,11 @@ model = model.to(device)
 count = 0
 
 epochs = 15
-network = NNetwork()
+
+if USE_HMAX_NETWORK:
+    network = model
+else:
+    network = NNetwork()
 
 criterion = nn.NLLLoss()
 optimizer = optim.Adam(network.parameters(), lr=0.003)

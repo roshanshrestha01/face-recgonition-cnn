@@ -17,4 +17,5 @@ SHOW_BATCHES = {
     'test': False,
 }
 
-USE_FMINST = False
+USE_FMINST = True
+USE_HMAX_NETWORK = False
