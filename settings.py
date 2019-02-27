@@ -17,5 +17,8 @@ SHOW_BATCHES = {
     'test': False,
 }
 
+DEBUG = True
+DEBUG_EPOCHS_VIEW_IMAGE = [25, 30, 49]
 USE_FMINST = False
 USE_HMAX_NETWORK = False
+USE_CNN = True

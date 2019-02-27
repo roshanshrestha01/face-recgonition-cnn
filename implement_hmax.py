@@ -3,8 +3,8 @@ from torch import nn, optim
 
 import hmax
 from dataloaders import train_dataloader, test_dataloader
-from networks import NNetwork
-from settings import USE_FMINST, USE_HMAX_NETWORK
+from networks import NNetwork, CNNetwork
+from settings import USE_FMINST, USE_HMAX_NETWORK, DEBUG, USE_CNN, DEBUG_EPOCHS_VIEW_IMAGE
 from utils import view_classify, show_batch
 from matplotlib import pyplot as plt
 
@@ -17,18 +17,19 @@ print('Running model on', device)
 model = model.to(device)
 count = 0
 
-epochs = 15
+epochs = 50
 
 if USE_HMAX_NETWORK:
     network = model
 else:
-    network = NNetwork()
+    network = CNNetwork() if USE_CNN else NNetwork()
 
-criterion = nn.NLLLoss()
-optimizer = optim.Adam(network.parameters(), lr=0.003)
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.SGD(network.parameters(), lr=0.01)
 
 train_losses, test_losses = [], []
 for _ in range(epochs):
+    _ += 1
     running_loss = 0
     for images, labels in train_dataloader:
         output = network(images)
@@ -54,6 +55,14 @@ for _ in range(epochs):
                 top_p, top_class = ps.topk(1, dim=1)
                 equals = top_class == labels.view(*top_class.shape)
                 accuracy += torch.mean(equals.type(torch.FloatTensor))
+                if DEBUG and _ in DEBUG_EPOCHS_VIEW_IMAGE:
+                    img = images[1]
+                    plt.imshow(img[0])
+                    plt.show()
+                    s_ps = torch.exp(network(img.reshape(1, 1, 128, 128)))
+                    s_top_p, s_top_class = s_ps.topk(1, dim=1)
+                    verion = 'Fashion' if USE_FMINST else 'ORL'
+                    view_classify(img, s_ps, verion)
 
         model.train()
         train_losses.append(running_loss / len(train_dataloader))
@@ -66,12 +75,10 @@ for _ in range(epochs):
     # c2 = model(X[:2, :, :, :])
     # s1, c1, s2, c2 = model.get_all_layers(X.to(device))
 
-
 plt.plot(train_losses, label='Training loss')
 plt.plot(test_losses, label='Validation loss')
 plt.legend(frameon=False)
 plt.show()
-
 
 # dataiter = iter(test_dataloader)
 # images, labels = dataiter.next()
@@ -89,5 +96,4 @@ plt.show()
 # accuracy = torch.mean(equals.type(torch.FloatTensor))
 #
 # verion = 'Fashion' if USE_FMINST else 'ORL'
-# ipdb.set_trace()
 # view_classify(img, ps, verion)
