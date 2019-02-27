@@ -421,13 +421,6 @@ class HMAX(nn.Module):
         c2_outputs = torch.cat(
             [c2_out[:, None, :] for c2_out in c2_outputs], 1)
 
-        # self.fc1 = nn.Linear(3200, 2048)
-        # self.fc1 = nn.Linear(2048, 1024)
-        # self.fc3 = nn.Linear(1024, 256)
-        # self.fc4 = nn.Linear(784, 256)
-        # self.fc5 = nn.Linear(256, 128)
-        # self.fc6 = nn.Linear(128, 64)
-        # self.fc7 = nn.Linear(64, 40)
         x = c2_outputs.view(c2_outputs.shape[0], -1)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
@@ -436,7 +429,7 @@ class HMAX(nn.Module):
         x = F.relu(self.fc5(x))
         x = F.relu(self.fc6(x))
         x = F.log_softmax(self.fc7(x), dim=1)
-        return x
+        return c2_outputs
 
     def get_all_layers(self, img):
         """Get the activation for all layers as NumPy arrays.
