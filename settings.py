@@ -6,7 +6,7 @@ DATA_DIR = os.path.join(BASE_DIR, 'data')
 RAW_DIR = os.path.join(DATA_DIR, 'raw')
 PROCESSED_DIR = os.path.join(DATA_DIR, 'processed')
 
-RESIZE = (128, 128)
+RESIZE = (48, 48)
 HAAR_CASCADE = os.path.join(BASE_DIR, 'cascade', 'haarcascade_frontalface_default.xml')
 
 
@@ -17,9 +17,9 @@ SHOW_BATCHES = {
     'test': False,
 }
 
-DEBUG = True
-DEBUG_EPOCHS_VIEW_IMAGE = [25, 30, 49]
+DEBUG = False
+DEBUG_EPOCHS_VIEW_IMAGE = [1, 2, 3]
 
 USE_FMINST = False
-USE_HMAX_NETWORK = True
-USE_CNN = False
+USE_HMAX_NETWORK = False
+USE_CNN = True

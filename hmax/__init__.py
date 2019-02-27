@@ -429,7 +429,7 @@ class HMAX(nn.Module):
         x = F.relu(self.fc5(x))
         x = F.relu(self.fc6(x))
         x = F.log_softmax(self.fc7(x), dim=1)
-        return x
+        return c2_outputs
 
     def get_all_layers(self, img):
         """Get the activation for all layers as NumPy arrays.

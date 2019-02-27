@@ -32,7 +32,10 @@ for _ in range(epochs):
     _ += 1
     running_loss = 0
     for images, labels in train_dataloader:
-        output = network(images)
+        images = images[:] / 255
+        c2 = model(images)
+
+        output = network(c2.reshape(10, 1, 8, 400))
 
         loss = criterion(output, labels)
         optimizer.zero_grad()
@@ -48,7 +51,9 @@ for _ in range(epochs):
         with torch.no_grad():
             model.eval()
             for images, labels in test_dataloader:
-                log_ps = network(images)
+                images = images[:] / 255
+                c2 = model(images)
+                log_ps = network(c2.reshape(10, 1, 8, 400))
                 test_loss += criterion(log_ps, labels)
 
                 ps = torch.exp(log_ps)
@@ -59,7 +64,7 @@ for _ in range(epochs):
                     img = images[1]
                     plt.imshow(img[0])
                     plt.show()
-                    s_ps = torch.exp(network(img.reshape(1, 1, 128, 128)))
+                    s_ps = torch.exp(network(img.reshape(1, 1, 48, 48)))
                     s_top_p, s_top_class = s_ps.topk(1, dim=1)
                     verion = 'Fashion' if USE_FMINST else 'ORL'
                     view_classify(img, s_ps, verion)
