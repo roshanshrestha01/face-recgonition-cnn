@@ -10,12 +10,12 @@ RESIZE = (128, 128)
 HAAR_CASCADE = os.path.join(BASE_DIR, 'cascade', 'haarcascade_frontalface_default.xml')
 
 
-SHUFFLE_BATCH = False
+SHUFFLE_BATCH = True
 SHOW_BATCHES = {
     'train': True,
     'validate': False,
     'test': False,
 }
 
-USE_FMINST = True
+USE_FMINST = False
 USE_HMAX_NETWORK = False

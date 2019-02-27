@@ -9,9 +9,9 @@ class NNetwork(nn.Module):
     def __init__(self):
         super(NNetwork, self).__init__()
         output = 10 if USE_FMINST else 40
-
-        # self.fc1 = nn.Linear(16384, 1024)
-        # self.fc2 = nn.Linear(1024, 784)
+        if not USE_FMINST:
+            self.fc1 = nn.Linear(16384, 1024)
+            self.fc2 = nn.Linear(1024, 784)
         self.fc3 = nn.Linear(784, 256)
         self.fc4 = nn.Linear(256, 128)
         self.fc5 = nn.Linear(128, 64)
@@ -22,8 +22,9 @@ class NNetwork(nn.Module):
 
     def forward(self, x):
         x = x.view(x.shape[0], -1)
-        # x = self.dropout(F.relu(self.fc1(x)))
-        # x = self.dropout(F.relu(self.fc2(x)))
+        if not USE_FMINST:
+            x = self.dropout(F.relu(self.fc1(x)))
+            x = self.dropout(F.relu(self.fc2(x)))
         x = self.dropout(F.relu(self.fc3(x)))
         x = self.dropout(F.relu(self.fc4(x)))
         x = self.dropout(F.relu(self.fc5(x)))

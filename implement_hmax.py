@@ -5,7 +5,7 @@ import hmax
 from dataloaders import train_dataloader, test_dataloader
 from networks import NNetwork
 from settings import USE_FMINST, USE_HMAX_NETWORK
-from utils import view_classify
+from utils import view_classify, show_batch
 from matplotlib import pyplot as plt
 
 print('Constructing model')
