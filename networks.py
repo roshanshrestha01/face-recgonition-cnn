@@ -45,9 +45,13 @@ class CNNetwork(nn.Module):
         self.conv3 = nn.Conv2d(32, 64, 3, padding=1)
 
         self.pool = nn.MaxPool2d(2, 2)
-        multiplier = 3 if USE_FMINST else 32
-        self.fc1 = nn.Linear(16384, 1024)
-        self.fc2 = nn.Linear(1024, output)
+        multiplier = 7 if USE_FMINST else 32
+        if USE_FMINST:
+            self.fc1 = nn.Linear(32 * multiplier * multiplier, 564)
+            self.fc2 = nn.Linear(564, output)
+        else:
+            self.fc1 = nn.Linear(16384, 1024)
+            self.fc2 = nn.Linear(1024, output)
         # self.fc3 = nn.Linear(1024, 784)
         # self.fc4 = nn.Linear(784, 256)
         # self.fc5 = nn.Linear(256, 64)
@@ -59,7 +63,8 @@ class CNNetwork(nn.Module):
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
-        x = self.pool(F.relu(self.conv3(x)))
+        if not USE_FMINST:
+            x = self.pool(F.relu(self.conv3(x)))
         multiplier = 3 if USE_FMINST else 32
         x = x.view(x.shape[0], -1)
         # x = x.view(-1, 64 * multiplier * multiplier)
