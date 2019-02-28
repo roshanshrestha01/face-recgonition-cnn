@@ -1,7 +1,7 @@
 import torch.nn.functional as F
 from torch import nn
 
-from settings import USE_FMINST
+from settings import USE_FMINST, RESIZE
 
 
 class NNetwork(nn.Module):
@@ -10,7 +10,7 @@ class NNetwork(nn.Module):
         super(NNetwork, self).__init__()
         output = 10 if USE_FMINST else 40
         if not USE_FMINST:
-            self.fc1 = nn.Linear(16384, 1024)
+            self.fc1 = nn.Linear(2304, 1024)
             self.fc2 = nn.Linear(1024, 784)
         self.fc3 = nn.Linear(784, 256)
         self.fc4 = nn.Linear(256, 128)

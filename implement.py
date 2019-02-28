@@ -4,7 +4,7 @@ from torch import nn, optim
 import hmax
 from dataloaders import train_dataloader, test_dataloader
 from networks import NNetwork, CNNetwork
-from settings import USE_FMINST, USE_HMAX_NETWORK, DEBUG, USE_CNN, DEBUG_EPOCHS_VIEW_IMAGE
+from settings import USE_FMINST, USE_HMAX_NETWORK, DEBUG, USE_CNN, DEBUG_EPOCHS_VIEW_IMAGE, RESIZE
 from utils import view_classify, show_batch
 from matplotlib import pyplot as plt
 
@@ -65,7 +65,7 @@ for _ in range(epochs):
                     img = images[1]
                     plt.imshow(img[0], cmap='gray')
                     plt.show()
-                    s_ps = torch.exp(network(img.reshape(1, 1, 48, 48)))
+                    s_ps = torch.exp(network(img.reshape(1, 1, RESIZE[0], RESIZE[0])))
                     s_top_p, s_top_class = s_ps.topk(1, dim=1)
                     verion = 'Fashion' if USE_FMINST else 'ORL'
                     view_classify(img, s_ps, verion)
@@ -74,7 +74,7 @@ for _ in range(epochs):
         train_losses.append(running_loss / len(train_dataloader))
         test_losses.append(test_loss / len(test_dataloader))
 
-        print("Epoch: {}/{}.. ".format(_ + 1, epochs),
+        print("Epoch: {}/{}.. ".format(_, epochs),
               "Training Loss: {:.3f}.. ".format(running_loss / len(train_dataloader)),
               "Test Loss: {:.3f}.. ".format(test_loss / len(test_dataloader)),
               "Test Accuracy: {:.3f}".format(accuracy / len(test_dataloader)))
