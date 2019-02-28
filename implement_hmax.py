@@ -17,13 +17,15 @@ print('Running model on', device)
 model = model.to(device)
 count = 0
 
-epochs = 50
+epochs = 100
 
 if USE_HMAX_NETWORK:
     network = model
 else:
     network = CNNetwork() if USE_CNN else NNetwork()
 
+# criterion = nn.NLLLoss()
+# optimizer = optim.Adam(network.parameters(), lr=0.003)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(network.parameters(), lr=0.01)
 
@@ -32,10 +34,8 @@ for _ in range(epochs):
     _ += 1
     running_loss = 0
     for images, labels in train_dataloader:
-        #images = images[:] / 255
-        #c2 = model(images)
-
-        #output = network(c2.reshape(10, 1, 8, 400))
+        # images = model(images)
+        # output = network(images.reshape(images.shape[0], 1, 8, 400))
         output = network(images)
 
         loss = criterion(output, labels)
@@ -52,9 +52,8 @@ for _ in range(epochs):
         with torch.no_grad():
             model.eval()
             for images, labels in test_dataloader:
-                #images = images[:] / 255
-                #c2 = model(images)
-                #log_ps = network(c2.reshape(10, 1, 8, 400))
+                # images = model(images)
+                # log_ps = network(images.reshape(images.shape[0], 1, 8, 400))
                 log_ps = network(images)
                 test_loss += criterion(log_ps, labels)
 
@@ -64,7 +63,7 @@ for _ in range(epochs):
                 accuracy += torch.mean(equals.type(torch.FloatTensor))
                 if DEBUG and _ in DEBUG_EPOCHS_VIEW_IMAGE:
                     img = images[1]
-                    plt.imshow(img[0])
+                    plt.imshow(img[0], cmap='gray')
                     plt.show()
                     s_ps = torch.exp(network(img.reshape(1, 1, 48, 48)))
                     s_top_p, s_top_class = s_ps.topk(1, dim=1)
