@@ -32,10 +32,11 @@ for _ in range(epochs):
     _ += 1
     running_loss = 0
     for images, labels in train_dataloader:
-        images = images[:] / 255
-        c2 = model(images)
+        #images = images[:] / 255
+        #c2 = model(images)
 
-        output = network(c2.reshape(10, 1, 8, 400))
+        #output = network(c2.reshape(10, 1, 8, 400))
+        output = network(images)
 
         loss = criterion(output, labels)
         optimizer.zero_grad()
@@ -51,9 +52,10 @@ for _ in range(epochs):
         with torch.no_grad():
             model.eval()
             for images, labels in test_dataloader:
-                images = images[:] / 255
-                c2 = model(images)
-                log_ps = network(c2.reshape(10, 1, 8, 400))
+                #images = images[:] / 255
+                #c2 = model(images)
+                #log_ps = network(c2.reshape(10, 1, 8, 400))
+                log_ps = network(images)
                 test_loss += criterion(log_ps, labels)
 
                 ps = torch.exp(log_ps)

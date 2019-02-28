@@ -50,7 +50,7 @@ class CNNetwork(nn.Module):
             self.fc1 = nn.Linear(32 * multiplier * multiplier, 564)
             self.fc2 = nn.Linear(564, output)
         else:
-            self.fc1 = nn.Linear(3200, 1024)
+            self.fc1 = nn.Linear(2304, 1024)
             self.fc2 = nn.Linear(1024, output)
         # self.fc3 = nn.Linear(1024, 784)
         # self.fc4 = nn.Linear(784, 256)

@@ -12,6 +12,7 @@ train_images = datasets.ImageFolder(
         transforms.Grayscale(),
         transforms.Scale(RESIZE),
         transforms.ToTensor(),
+
         transforms.Lambda(lambda x: x * 255),
     ])
 )
