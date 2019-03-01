@@ -23,5 +23,7 @@ class HaarFaceDetect:
         :return:
             ROI detected image as PIL
         """
-        img, roi = get_roi(self.to_numpy(image))
-        return self.from_numpy(roi) if roi is not None else image
+        # img, roi = get_roi(self.to_numpy(image))
+        img = self.to_numpy(image)
+        roi = self.to_numpy(image)
+        return self.from_numpy(roi) if roi is not None else self.from_numpy(img)

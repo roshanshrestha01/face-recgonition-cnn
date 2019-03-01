@@ -17,7 +17,7 @@ SHOW_BATCHES = {
     'test': False,
 }
 
-DEBUG = True
+DEBUG = False
 DEBUG_EPOCHS_VIEW_IMAGE = [20, 50, 80, 95]
 
 USE_FMINST = False

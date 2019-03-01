@@ -8,7 +8,7 @@ from transforms import HaarFaceDetect
 train_images = datasets.ImageFolder(
     os.path.join(PROCESSED_DIR, 'train'),
     transform=transforms.Compose([
-        # HaarFaceDetect(),
+        HaarFaceDetect(),
         transforms.Grayscale(),
         transforms.Scale(RESIZE),
         transforms.ToTensor(),
@@ -19,7 +19,7 @@ train_images = datasets.ImageFolder(
 validate_images = datasets.ImageFolder(
     os.path.join(PROCESSED_DIR, 'validate'),
     transform=transforms.Compose([
-        # HaarFaceDetect(),
+        HaarFaceDetect(),
         transforms.Grayscale(),
         transforms.Scale(RESIZE),
         transforms.ToTensor(),
@@ -30,7 +30,7 @@ validate_images = datasets.ImageFolder(
 test_images = datasets.ImageFolder(
     os.path.join(PROCESSED_DIR, 'test'),
     transform=transforms.Compose([
-        # HaarFaceDetect(),
+        HaarFaceDetect(),
         transforms.Grayscale(),
         transforms.Scale(RESIZE),
         transforms.ToTensor(),
