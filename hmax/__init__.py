@@ -56,7 +56,7 @@ import torch
 from torch import nn
 
 
-def gabor_filter(size, wavelength, orientation):
+def gabor_filter(size, wavelength, sigma, orientation):
     """Create a single gabor filter.
 
     Parameters
@@ -78,7 +78,7 @@ def gabor_filter(size, wavelength, orientation):
         The filter weights.
     """
     lambda_ = size * 2. / wavelength
-    sigma = lambda_ * 0.8
+    # sigma = lambda_ * 0.8
     gamma = 0.3  # spatial aspect ratio: 0.23 < gamma < 0.92
     theta = np.deg2rad(orientation + 90)
 
@@ -120,7 +120,7 @@ class S1(nn.Module):
     orientations : list of float
         The orientations of the Gabor filters, in degrees.
     """
-    def __init__(self, size, wavelength, orientations=[90, -45, 0, 45]):
+    def __init__(self, size, wavelength, sigma, orientations=[90, -45, 0, 45]):
         super().__init__()
         self.num_orientations = len(orientations)
         self.size = size
@@ -134,7 +134,7 @@ class S1(nn.Module):
         # orientation
         for channel, orientation in enumerate(orientations):
             self.gabor.weight.data[channel, 0] = torch.Tensor(
-                gabor_filter(size, wavelength, orientation))
+                gabor_filter(size, wavelength, sigma, orientation))
 
         # A convolution layer filled with ones. This is used to normalize the
         # result in the forward method.
@@ -318,22 +318,22 @@ class HMAX(nn.Module):
 
         # S1 layers, consisting of units with increasing size
         self.s1_units = [
-            S1(size=7, wavelength=4),
-            S1(size=9, wavelength=3.95),
-            S1(size=11, wavelength=3.9),
-            S1(size=13, wavelength=3.85),
-            S1(size=15, wavelength=3.8),
-            S1(size=17, wavelength=3.75),
-            S1(size=19, wavelength=3.7),
-            S1(size=21, wavelength=3.65),
-            S1(size=23, wavelength=3.6),
-            S1(size=25, wavelength=3.55),
-            S1(size=27, wavelength=3.5),
-            S1(size=29, wavelength=3.45),
-            S1(size=31, wavelength=3.4),
-            S1(size=33, wavelength=3.35),
-            S1(size=35, wavelength=3.3),
-            S1(size=37, wavelength=3.25),
+            S1(size=7, wavelength=3.5, sigma=2.8),
+            S1(size=9, wavelength=4.6, sigma=3.6),
+            S1(size=11, wavelength=5.6, sigma=4.5),
+            S1(size=13, wavelength=6.8, sigma=5.4),
+            S1(size=15, wavelength=7.9, sigma=6.3),
+            S1(size=17, wavelength=9.1, sigma=7.3),
+            S1(size=19, wavelength=10.3, sigma=8.2),
+            S1(size=21, wavelength=11.5, sigma=9.2),
+            S1(size=23, wavelength=12.7, sigma=10.2),
+            S1(size=25, wavelength=14.1, sigma=11.3),
+            S1(size=27, wavelength=15.4, sigma=12.3),
+            S1(size=29, wavelength=16.8, sigma=13.4),
+            S1(size=31, wavelength=18.8, sigma=14.6),
+            S1(size=33, wavelength=19.7, sigma=15.8),
+            S1(size=35, wavelength=21.2, sigma=17.0),
+            S1(size=37, wavelength=22.8, sigma=18.2),
         ]
 
         # Explicitly add the S1 units as submodules of the model
