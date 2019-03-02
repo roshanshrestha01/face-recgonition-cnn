@@ -2,7 +2,7 @@ import torch
 from torch import nn, optim
 
 import hmax
-from dataloaders import train_dataloader, test_dataloader
+from dataloaders import train_dataloader, test_dataloader, validate_dataloader
 from networks import NNetwork, CNNetwork
 from settings import USE_FMINST, USE_HMAX_NETWORK, DEBUG, USE_CNN, DEBUG_EPOCHS_VIEW_IMAGE, RESIZE
 from utils import view_classify, show_batch
@@ -17,7 +17,7 @@ print('Running model on', device)
 model = model.to(device)
 count = 0
 
-epochs = 100
+epochs = 25
 
 if USE_HMAX_NETWORK:
     network = model
@@ -29,7 +29,7 @@ else:
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(network.parameters(), lr=0.01)
 
-train_losses, test_losses = [], []
+train_losses, validate_losses, accuracy_data = [], [], []
 for _ in range(epochs):
     _ += 1
     running_loss = 0
@@ -45,17 +45,17 @@ for _ in range(epochs):
 
         running_loss += loss.item()
     else:
-        test_loss = 0
+        validate_loss = 0
         accuracy = 0
 
         # Turn off gradients for validation, saves memory and computations
         with torch.no_grad():
             model.eval()
-            for images, labels in test_dataloader:
+            for images, labels in validate_dataloader:
                 # images = model(images)
                 # log_ps = network(images.reshape(images.shape[0], 1, 8, 400))
                 log_ps = network(images)
-                test_loss += criterion(log_ps, labels)
+                validate_loss += criterion(log_ps, labels)
 
                 ps = torch.exp(log_ps)
                 top_p, top_class = ps.topk(1, dim=1)
@@ -72,20 +72,22 @@ for _ in range(epochs):
 
         model.train()
         train_losses.append(running_loss / len(train_dataloader))
-        test_losses.append(test_loss / len(test_dataloader))
-
+        validate_losses.append(validate_loss / len(validate_dataloader))
+        accuracy_data.append(accuracy / len(validate_dataloader))
         print("Epoch: {}/{}.. ".format(_, epochs),
               "Training Loss: {:.3f}.. ".format(running_loss / len(train_dataloader)),
-              "Test Loss: {:.3f}.. ".format(test_loss / len(test_dataloader)),
-              "Test Accuracy: {:.3f}".format(accuracy / len(test_dataloader)))
+              "Validate Loss: {:.3f}.. ".format(validate_loss / len(validate_dataloader)),
+              "Accuracy: {:.3f}".format(accuracy / len(validate_dataloader)))
     # c2 = model(X[:2, :, :, :])
     # s1, c1, s2, c2 = model.get_all_layers(X.to(device))
 
 plt.plot(train_losses, label='Training loss')
-plt.plot(test_losses, label='Validation loss')
+plt.plot(validate_losses, label='Validation loss')
 plt.legend(frameon=False)
 plt.show()
-
+plt.plot(accuracy_data, label='Accuracy')
+plt.legend(frameon=False)
+plt.show()
 # dataiter = iter(test_dataloader)
 # images, labels = dataiter.next()
 # img = images[1]
