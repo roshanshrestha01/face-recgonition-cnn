@@ -3,12 +3,13 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
 from settings import PROCESSED_DIR, SHUFFLE_BATCH, RESIZE, USE_FMINST
-from transforms import HaarFaceDetect
+from transforms import HaarFaceDetect, HMAXTransform
 
 train_images = datasets.ImageFolder(
     os.path.join(PROCESSED_DIR, 'train'),
     transform=transforms.Compose([
         HaarFaceDetect(),
+        HMAXTransform(),
         transforms.Grayscale(),
         transforms.Scale(RESIZE),
         transforms.ToTensor(),
@@ -20,6 +21,7 @@ validate_images = datasets.ImageFolder(
     os.path.join(PROCESSED_DIR, 'validate'),
     transform=transforms.Compose([
         HaarFaceDetect(),
+        HMAXTransform(),
         transforms.Grayscale(),
         transforms.Scale(RESIZE),
         transforms.ToTensor(),
@@ -31,6 +33,7 @@ test_images = datasets.ImageFolder(
     os.path.join(PROCESSED_DIR, 'test'),
     transform=transforms.Compose([
         HaarFaceDetect(),
+        HMAXTransform(),
         transforms.Grayscale(),
         transforms.Scale(RESIZE),
         transforms.ToTensor(),

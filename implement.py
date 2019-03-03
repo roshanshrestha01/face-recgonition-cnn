@@ -17,7 +17,7 @@ print('Running model on', device)
 model = model.to(device)
 count = 0
 
-epochs = 25
+epochs = 100
 
 if USE_HMAX_NETWORK:
     network = model

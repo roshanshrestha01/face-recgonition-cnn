@@ -27,3 +27,12 @@ class HaarFaceDetect:
         img = self.to_numpy(image)
         roi = self.to_numpy(image)
         return self.from_numpy(roi) if roi is not None else self.from_numpy(img)
+
+
+class HMAXTransform:
+    """
+    Apply opencv haar cascade face detection and return roi cropped image.
+    """
+
+    def __call__(self, image):
+        return image

@@ -1,54 +1,4 @@
 # encoding: utf8
-"""
-PyTorch implementation of the HMAX model of human vision. For more information
-about HMAX, check:
-
-    http://maxlab.neuro.georgetown.edu/hmax.html
-
-The S and C units of the HMAX model can almost be mapped directly onto
-TorchVision's Conv2d and MaxPool2d layers, where channels are used to store the
-filters for different orientations. However, HMAX also implements multiple
-scales, which doesn't map nicely onto the existing TorchVision functionality.
-Therefore, each scale has its own Conv2d layer, which are executed in parallel.
-
-Here is a schematic overview of the network architecture:
-
-layers consisting of units with increasing scale
-S1 S1 S1 S1 S1 S1 S1 S1 S1 S1 S1 S1 S1 S1 S1 S1
- \ /   \ /   \ /   \ /   \ /   \ /   \ /   \ /
-  C1    C1    C1    C1    C1    C1    C1    C1
-   \     \     \    |     /     /     /     /
-           ALL-TO-ALL CONNECTIVITY
-   /     /     /    |     \     \     \     \
-  S2    S2    S2    S2    S2    S2    S2    S2
-   |     |     |     |     |     |     |     |
-  C2    C2    C2    C2    C2    C2    C2    C2
-
-Author: Marijn van Vliet <w.m.vanvliet@gmail.com>
-
-References
-----------
-
-  .. [1] Riesenhuber, Maximilian, and Tomaso Poggio. “Hierarchical Models of
-         Object Recognition in Cortex.” Nature Neuroscience 2, no. 11 (1999):
-         1019–25.  https://doi.org/10.1038/14819.
-  .. [2] Serre, T, M Kouh, C Cadieu, U Knoblich, Gabriel Kreiman, and T Poggio.
-         “A Theory of Object Recognition: Computations and Circuits in the
-         Feedforward Path of the Ventral Stream in Primate Visual Cortex.”
-         Artificial Intelligence, no. December (2005): 1–130.
-         https://doi.org/10.1.1.207.9279.
-  .. [3] Serre, Thomas, Aude Oliva, and Tomaso Poggio. “A Feedforward
-         Architecture Accounts for Rapid Categorization.” Proceedings of the
-         National Academy of Sciences 104, no. 15 (April 10, 2007): 6424–29.
-         https://doi.org/10.1073/pnas.0700622104.
-  .. [4] Serre, Thomas, and Maximilian Riesenhuber. “Realistic Modeling of
-         Simple and Complex Cell Tuning in the HMAXModel, and Implications for
-         Invariant Object Recognition in Cortex.” CBCL Memo, no. 239 (2004).
-  .. [5] Serre, Thomas, Lior Wolf, Stanley Bileschi, Maximilian Riesenhuber,
-         and Tomaso Poggio. “Robust Object Recognition with Cortex-like
-         Mechanisms.” IEEE Trans Pattern Anal Mach Intell 29, no. 3 (2007):
-         411–26.  https://doi.org/10.1109/TPAMI.2007.56.
-"""
 import torch.nn.functional as F
 import numpy as np
 from scipy.io import loadmat
@@ -57,26 +7,6 @@ from torch import nn
 
 
 def gabor_filter(size, wavelength, sigma, orientation):
-    """Create a single gabor filter.
-
-    Parameters
-    ----------
-    size : int
-        The size of the filter, measured in pixels. The filter is square, hence
-        only a single number (either width or height) needs to be specified.
-    wavelength : float
-        The wavelength of the grating in the filter, relative to the half the
-        size of the filter. For example, a wavelength of 2 will generate a
-        Gabor filter with a grating that contains exactly one wave. This
-        determines the "tightness" of the filter.
-    orientation : float
-        The orientation of the grating in the filter, in degrees.
-
-    Returns
-    -------
-    filt : ndarray, shape (size, size)
-        The filter weights.
-    """
     lambda_ = size * 2. / wavelength
     # sigma = lambda_ * 0.8
     gamma = 0.3  # spatial aspect ratio: 0.23 < gamma < 0.92
@@ -98,50 +28,21 @@ def gabor_filter(size, wavelength, sigma, orientation):
 
 
 class S1(nn.Module):
-    """A layer of S1 units with different orientations but the same scale.
-
-    The S1 units are at the bottom of the network. They are exposed to the raw
-    pixel data of the image. Each S1 unit is a Gabor filter, which detects
-    edges in a certain orientation. They are implemented as PyTorch Conv2d
-    modules, where each channel is loaded with a Gabor filter in a specific
-    orientation.
-
-    Parameters
-    ----------
-    size : int
-        The size of the filters, measured in pixels. The filters are square,
-        hence only a single number (either width or height) needs to be
-        specified.
-    wavelength : float
-        The wavelength of the grating in the filter, relative to the half the
-        size of the filter. For example, a wavelength of 2 will generate a
-        Gabor filter with a grating that contains exactly one wave. This
-        determines the "tightness" of the filter.
-    orientations : list of float
-        The orientations of the Gabor filters, in degrees.
-    """
     def __init__(self, size, wavelength, sigma, orientations=[90, -45, 0, 45]):
         super().__init__()
         self.num_orientations = len(orientations)
         self.size = size
 
-        # Use PyTorch's Conv2d as a base object. Each "channel" will be an
-        # orientation.
         self.gabor = nn.Conv2d(1, self.num_orientations, size,
                                padding=size // 2, bias=False)
 
-        # Fill the Conv2d filter weights with Gabor kernels: one for each
-        # orientation
         for channel, orientation in enumerate(orientations):
             self.gabor.weight.data[channel, 0] = torch.Tensor(
                 gabor_filter(size, wavelength, sigma, orientation))
 
-        # A convolution layer filled with ones. This is used to normalize the
-        # result in the forward method.
         self.uniform = nn.Conv2d(1, 4, size, padding=size // 2, bias=False)
         nn.init.constant_(self.uniform.weight, 1)
 
-        # Since everything is pre-computed, no gradient is required
         for p in self.parameters():
             p.requires_grad = False
 
@@ -155,15 +56,6 @@ class S1(nn.Module):
 
 
 class C1(nn.Module):
-    """A layer of C1 units with different orientations but the same scale.
-
-    Each C1 unit pools over the S1 units that are assigned to it.
-
-    Parameters
-    ----------
-    size : int
-        Size of the MaxPool2d operation being performed by this C1 layer.
-    """
     def __init__(self, size):
         super().__init__()
         self.size = size
@@ -182,35 +74,6 @@ class C1(nn.Module):
 
 
 class S2(nn.Module):
-    """A layer of S2 units with different orientations but the same scale.
-
-    The activation of these units is computed by taking the distance between
-    the output of the C layer below and a set of predefined patches. This
-    distance is computed as:
-
-      d = sqrt( (w - p)^2 )
-        = sqrt( w^2 - 2pw + p^2 )
-
-    Parameters
-    ----------
-    patches : ndarray, shape (n_patches, n_orientations, size, size)
-        The precomputed patches to lead into the weights of this layer.
-    activation : 'gaussian' | 'euclidean'
-        Which activation function to use for the units. In the PNAS paper, a
-        gaussian curve is used ('guassian', the default), whereas the MATLAB
-        implementation of The Laboratory for Computational Cognitive
-        Neuroscience uses the euclidean distance ('euclidean').
-    sigma : float
-        The sharpness of the tuning (sigma in eqn 1 of [1]_). Defaults to 1.
-
-    References:
-    -----------
-
-    .. [1] Serre, Thomas, Aude Oliva, and Tomaso Poggio. “A Feedforward
-           Architecture Accounts for Rapid Categorization.” Proceedings of the
-           National Academy of Sciences 104, no. 15 (April 10, 2007): 6424–29.
-           https://doi.org/10.1073/pnas.0700622104.
-    """
     def __init__(self, patches, activation='gaussian', sigma=1):
         super().__init__()
         self.activation = activation
@@ -291,28 +154,6 @@ class C2(nn.Module):
 
 
 class HMAX(nn.Module):
-    """The full HMAX model.
-
-    Use the `get_all_layers` method to obtain the activations for all layers.
-
-    If you are only interested in the final output (=C2 layer), use the model
-    as any other PyTorch module:
-
-        model = HMAX(universal_patch_set)
-        output = model(img)
-
-    Parameters
-    ----------
-    universal_patch_set : str
-        Filename of the .mat file containing the universal patch set.
-    s2_act : 'gaussian' | 'euclidean'
-        The activation function for the S2 units. Defaults to 'gaussian'.
-
-    Returns
-    -------
-    c2_output : list of Tensors, shape (batch_size, num_patches)
-        For each scale, the output of the C2 units.
-    """
     def __init__(self, universal_patch_set, s2_act='gaussian'):
         super().__init__()
 
@@ -377,25 +218,6 @@ class HMAX(nn.Module):
             self.add_module('c2_%d' % i, c2)
 
     def run_all_layers(self, img):
-        """Compute the activation for each layer.
-
-        Parameters
-        ----------
-        img : Tensor, shape (batch_size, 1, height, width)
-            A batch of images to run through the model
-
-        Returns
-        -------
-        s1_outputs : List of Tensors, shape (batch_size, num_orientations, height, width)
-            For each scale, the output of the layer of S1 units.
-        c1_outputs : List of Tensors, shape (batch_size, num_orientations, height, width)
-            For each scale, the output of the layer of C1 units.
-        s2_outputs : List of lists of Tensors, shape (batch_size, num_patches, height, width)
-            For each C1 scale and each patch scale, the output of the layer of
-            S2 units.
-        c2_outputs : List of Tensors, shape (batch_size, num_patches)
-            For each patch scale, the output of the layer of C2 units.
-        """
         s1_outputs = [s1(img) for s1 in self.s1_units]
 
         # Each C1 layer pools across two S1 layers
@@ -417,25 +239,6 @@ class HMAX(nn.Module):
         return c2_outputs
 
     def get_all_layers(self, img):
-        """Get the activation for all layers as NumPy arrays.
-
-        Parameters
-        ----------
-        img : Tensor, shape (batch_size, 1, height, width)
-            A batch of images to run through the model
-
-        Returns
-        -------
-        s1_outputs : List of arrays, shape (batch_size, num_orientations, height, width)
-            For each scale, the output of the layer of S1 units.
-        c1_outputs : List of arrays, shape (batch_size, num_orientations, height, width)
-            For each scale, the output of the layer of C1 units.
-        s2_outputs : List of lists of arrays, shape (batch_size, num_patches, height, width)
-            For each C1 scale and each patch scale, the output of the layer of
-            S2 units.
-        c2_outputs : List of arrays, shape (batch_size, num_patches)
-            For each patch scale, the output of the layer of C2 units.
-        """
         s1_out, c1_out, s2_out, c2_out = self.run_all_layers(img)
         return (
             [s1.cpu().detach().numpy() for s1 in s1_out],

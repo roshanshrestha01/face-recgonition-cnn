@@ -52,11 +52,6 @@ class CNNetwork(nn.Module):
         else:
             self.fc1 = nn.Linear(2304, 1024)
             self.fc2 = nn.Linear(1024, output)
-        # self.fc3 = nn.Linear(1024, 784)
-        # self.fc4 = nn.Linear(784, 256)
-        # self.fc5 = nn.Linear(256, 64)
-        # self.fc6 = nn.Linear(64, output)
-
         self.dropout = nn.Dropout(p=0.2)
 
 
@@ -70,9 +65,5 @@ class CNNetwork(nn.Module):
         # x = x.view(-1, 64 * multiplier * multiplier)
         x = self.dropout(x)
         x = self.dropout(F.relu(self.fc1(x)))
-        # x = self.dropout(F.relu(self.fc2(x)))
-        # x = self.dropout(F.relu(self.fc3(x)))
-        # x = self.dropout(F.relu(self.fc4(x)))
-        # x = self.dropout(F.relu(self.fc5(x)))
         x = F.log_softmax(self.fc2(x), dim=1)
         return x
