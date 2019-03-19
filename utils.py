@@ -94,7 +94,10 @@ def view_classify(img, ps, version="MNIST"):
         ax.set_yticks(np.arange(40))
         ax.set_yticklabels(classes, size='small')
         ax.set_title('Class Probability')
+        plt.xlabel('Probability')
+        plt.ylabel('Subjects value')
         ax.set_xlim(0, 1.1)
+        plt.tight_layout()
         plt.show()
         return
 

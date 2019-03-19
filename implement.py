@@ -77,9 +77,14 @@ for _ in range(epochs):
 
 plt.plot(train_losses, label='Training loss')
 plt.plot(validate_losses, label='Validation loss')
+plt.ylabel('Loss')
+plt.xlabel('epochs')
 plt.legend(frameon=False)
 plt.show()
 plt.plot(accuracy_data, label='Accuracy')
+# plt.yticks([acc * 100 for acc in accuracy_data], [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100])
+plt.ylabel('Accuracy')
+plt.xlabel('epochs')
 plt.legend(frameon=False)
 plt.show()
 
