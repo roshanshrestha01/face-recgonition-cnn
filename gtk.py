@@ -4,6 +4,7 @@ from builtins import ord
 import gi
 import cv2
 import numpy as np
+from torch import nn
 
 from settings import HAAR_CASCADE, CAPTURE_DIR
 from utils import check_folder
@@ -128,6 +129,12 @@ class FaceRecognitionWindow(Gtk.Window):
         pass
 
     def training_model(self, button):
+        model = None
+        output_length = 3
+        for param in model.parameters():
+            param.requires_grad = False
+        # classifier = nn.Sequential(OrderedDict)
+
         pass
 
     def open_predict_window(self, button):
