@@ -1,6 +1,6 @@
 import torch
 from torch import nn, optim
-
+import numpy as np
 import hmax
 from dataloaders import train_dataloader, validate_dataloader
 from networks import NNetwork, CNNetwork
@@ -28,6 +28,8 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(network.parameters(), lr=0.01)
 
 train_losses, validate_losses, accuracy_data = [], [], []
+
+valid_loss_min = np.Inf
 for _ in range(epochs):
     _ += 1
     running_loss = 0
@@ -67,13 +69,22 @@ for _ in range(epochs):
                     view_classify(img, s_ps, verion)
 
         model.train()
-        train_losses.append(running_loss / len(train_dataloader))
-        validate_losses.append(validate_loss / len(validate_dataloader))
+        train_loss = running_loss / len(train_dataloader)
+        valid_loss = validate_loss / len(validate_dataloader.dataset)
+        train_losses.append(train_loss)
+        validate_losses.append(valid_loss)
         accuracy_data.append(accuracy / len(validate_dataloader))
         print("Epoch: {}/{}.. ".format(_, epochs),
               "Training Loss: {:.3f}.. ".format(running_loss / len(train_dataloader)),
               "Validate Loss: {:.3f}.. ".format(validate_loss / len(validate_dataloader)),
               "Accuracy: {:.3f}".format(accuracy / len(validate_dataloader)))
+
+        if valid_loss <= valid_loss_min:
+            print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(
+                valid_loss_min,
+                valid_loss))
+            torch.save(model.state_dict(), 'orl_database_faces.pt')
+            valid_loss_min = valid_loss
 
 plt.plot(train_losses, label='Training loss')
 plt.plot(validate_losses, label='Validation loss')

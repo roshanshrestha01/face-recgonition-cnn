@@ -7,9 +7,10 @@ RAW_DIR = os.path.join(DATA_DIR, 'raw')
 PROCESSED_DIR = os.path.join(DATA_DIR, 'processed')
 CAPTURE_DIR = os.path.join(DATA_DIR, 'capture')
 
+ORL_TRAINED_MODEL = os.path.join(BASE_DIR, 'orl_database.faces.pt')
+
 RESIZE = (48, 48)
 HAAR_CASCADE = os.path.join(BASE_DIR, 'cascade', 'haarcascade_frontalface_default.xml')
-
 
 SHUFFLE_BATCH = True
 SHOW_BATCHES = {
