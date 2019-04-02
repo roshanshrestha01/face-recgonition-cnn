@@ -1,7 +1,17 @@
+import os
+from builtins import ord
+
 import gi
+import cv2
+import numpy as np
+
+from settings import HAAR_CASCADE, CAPTURE_DIR
+from utils import check_folder
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
+
+face_cascade = cv2.CascadeClassifier(HAAR_CASCADE)
 
 
 class FaceRecognitionWindow(Gtk.Window):
@@ -73,8 +83,46 @@ class FaceRecognitionWindow(Gtk.Window):
         return box_outer
 
     def open_capture_image_window(self, button):
-        print(self.subject_name.get_text())
-        pass
+        subject_name = self.subject_name.get_text()
+        print(subject_name)
+
+        cap = cv2.VideoCapture(2)
+        count = 1
+
+        while True:
+            ret, img = cap.read()
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+            roi_gray = None
+            for (x, y, w, h) in faces:
+                cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+                roi_gray = gray[y:y + h, x:x + w]
+                roi_color = img[y:y + h, x:x + w]
+                # if roi_gray is not None:
+                #     check_folder(CAPTURE_DIR)
+                #     subject_root = os.path.join(CAPTURE_DIR, subject_name)
+                #     check_folder(subject_root)
+                #     cv2.imwrite(os.path.join(subject_root, '{}.jpg'.format(count)), roi_gray)
+                #     count += 1
+                #     print(count)
+
+            cv2.imshow('Video', img)
+            k = cv2.waitKey(30) & 0xff
+            if k == ord('c'):
+                check_folder(CAPTURE_DIR)
+                subject_root = os.path.join(CAPTURE_DIR, subject_name)
+                check_folder(subject_root)
+                count = len(os.listdir(subject_root))
+                if roi_gray is not None:
+                    cv2.imwrite(os.path.join(subject_root, '{}.jpg'.format(count)), roi_gray)
+                    count += 1
+                else:
+                    print('ROI cannot be found.')
+            if k == 27:
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
 
     def sort_images(self, button):
         pass
