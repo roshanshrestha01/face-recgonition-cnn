@@ -230,14 +230,9 @@ class FaceRecognitionWindow(Gtk.Window):
                     top_p, top_class = ps.topk(1, dim=1)
                     index = top_class.reshape(-1)[0]
                     subject_name = self.classes[index]
+                    cv2.putText(img, subject_name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX,
+                                0.75, (0, 255, 0), 2)
                     print(subject_name)
-                    # check_folder(CAPTURE_DIR)
-                    # subject_root = os.path.join(CAPTURE_DIR, subject_name)
-                    # check_folder(subject_root)
-                    # cv2.imwrite(os.path.join(subject_root, '{}.jpg'.format(count)), roi_gray)
-                    # count += 1
-                    # print(count)
-
             cv2.imshow('Video', img)
             k = cv2.waitKey(30) & 0xff
             if k == 27:
