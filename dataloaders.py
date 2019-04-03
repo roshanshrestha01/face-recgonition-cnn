@@ -56,7 +56,7 @@ capture_images = datasets.ImageFolder(
 train_dataloader = DataLoader(train_images, batch_size=10, shuffle=SHUFFLE_BATCH)
 validate_dataloader = DataLoader(validate_images, batch_size=10)
 test_dataloader = DataLoader(test_images, batch_size=10)
-capture_dataloader = DataLoader(capture_images, batch_size=2)
+capture_dataloader = DataLoader(capture_images, batch_size=10)
 
 # Fashion MNIST datasets
 if USE_FMINST:

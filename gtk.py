@@ -5,11 +5,14 @@ import gi
 import cv2
 import numpy as np
 import torch
+from PIL import Image
 from torch import nn, optim
+from torchvision import transforms
+from torch.autograd import Variable
 
 from dataloaders import capture_dataloader
 from networks import NNetwork, CNNetwork
-from settings import HAAR_CASCADE, CAPTURE_DIR, ORL_TRAINED_MODEL, USE_CNN
+from settings import HAAR_CASCADE, CAPTURE_DIR, ORL_TRAINED_MODEL, USE_CNN, RESIZE
 from utils import check_folder
 
 gi.require_version('Gtk', '3.0')
@@ -22,6 +25,11 @@ class FaceRecognitionWindow(Gtk.Window):
 
     def __init__(self):
         Gtk.Window.__init__(self, title="Face Recognition")
+        self.model = None
+        try:
+            self.classes = capture_dataloader.dataset.classes
+        except:
+            pass
         self.set_position(Gtk.WindowPosition.CENTER)
         self.set_border_width(10)
         self.CITY_NAME = None  # for refresh action
@@ -88,7 +96,6 @@ class FaceRecognitionWindow(Gtk.Window):
 
     def open_capture_image_window(self, button):
         subject_name = self.subject_name.get_text()
-        print(subject_name)
 
         cap = cv2.VideoCapture(2)
         count = 1
@@ -142,7 +149,7 @@ class FaceRecognitionWindow(Gtk.Window):
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(model.parameters(), lr=0.01)
 
-        epochs = 50
+        epochs = 10
         steps = 0
         running_loss = 0
         print_every = 5
@@ -183,10 +190,61 @@ class FaceRecognitionWindow(Gtk.Window):
                           f"Test accuracy: {accuracy / len(capture_dataloader):.3f}")
                     running_loss = 0
                     model.train()
+        self.model = model
+
+        dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, "Training Finished.")
+        dialog.format_secondary_text(
+            "Press ok to continue.")
+        dialog.run()
+        dialog.destroy()
         pass
 
+    def convert_to_pil(self, array):
+        return Image.fromarray(array, 'L')
+
     def open_predict_window(self, button):
-        pass
+        cap = cv2.VideoCapture(2)
+        count = 1
+
+        while True:
+            ret, img = cap.read()
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+            roi_gray = None
+            for (x, y, w, h) in faces:
+                cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+                roi_gray = gray[y:y + h, x:x + w]
+                roi_color = img[y:y + h, x:x + w]
+                if roi_gray is not None:
+                    image = self.convert_to_pil(roi_gray)
+                    test_transforms = transforms.Compose([
+                        transforms.Scale(RESIZE),
+                        transforms.ToTensor(),
+                        transforms.Lambda(lambda x: x * 255),
+                    ])
+                    tensor = test_transforms(image)
+                    image_tensor = tensor.unsqueeze_(0)
+                    input = Variable(image_tensor)
+                    output = self.model(input)
+                    ps = torch.exp(output)
+                    top_p, top_class = ps.topk(1, dim=1)
+                    index = top_class.reshape(-1)[0]
+                    subject_name = self.classes[index]
+                    print(subject_name)
+                    # check_folder(CAPTURE_DIR)
+                    # subject_root = os.path.join(CAPTURE_DIR, subject_name)
+                    # check_folder(subject_root)
+                    # cv2.imwrite(os.path.join(subject_root, '{}.jpg'.format(count)), roi_gray)
+                    # count += 1
+                    # print(count)
+
+            cv2.imshow('Video', img)
+            k = cv2.waitKey(30) & 0xff
+            if k == 27:
+                break
+
+        cap.release()
+        cv2.destroyAllWindows()
 
 
 win = FaceRecognitionWindow()
