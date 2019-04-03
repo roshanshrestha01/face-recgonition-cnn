@@ -4,9 +4,12 @@ from builtins import ord
 import gi
 import cv2
 import numpy as np
-from torch import nn
+import torch
+from torch import nn, optim
 
-from settings import HAAR_CASCADE, CAPTURE_DIR
+from dataloaders import capture_dataloader
+from networks import NNetwork, CNNetwork
+from settings import HAAR_CASCADE, CAPTURE_DIR, ORL_TRAINED_MODEL, USE_CNN
 from utils import check_folder
 
 gi.require_version('Gtk', '3.0')
@@ -129,12 +132,57 @@ class FaceRecognitionWindow(Gtk.Window):
         pass
 
     def training_model(self, button):
-        model = None
-        output_length = 3
+        model = CNNetwork() if USE_CNN else NNetwork()
+        state_dict = torch.load(ORL_TRAINED_MODEL)
+        model.load_state_dict(state_dict)
         for param in model.parameters():
             param.requires_grad = False
-        # classifier = nn.Sequential(OrderedDict)
+        model.fc2 = nn.Linear(1024, 3)
 
+        criterion = nn.CrossEntropyLoss()
+        optimizer = optim.SGD(model.parameters(), lr=0.01)
+
+        epochs = 50
+        steps = 0
+        running_loss = 0
+        print_every = 5
+        for epoch in range(epochs):
+            for inputs, labels in capture_dataloader:
+                steps += 1
+                # Move input and label tensors to the default device
+
+                optimizer.zero_grad()
+
+                logps = model.forward(inputs)
+                loss = criterion(logps, labels)
+                loss.backward()
+                optimizer.step()
+
+                running_loss += loss.item()
+
+                if steps % print_every == 0:
+                    test_loss = 0
+                    accuracy = 0
+                    model.eval()
+                    with torch.no_grad():
+                        for inputs, labels in capture_dataloader:
+                            logps = model.forward(inputs)
+                            batch_loss = criterion(logps, labels)
+
+                            test_loss += batch_loss.item()
+
+                            # Calculate accuracy
+                            ps = torch.exp(logps)
+                            top_p, top_class = ps.topk(1, dim=1)
+                            equals = top_class == labels.view(*top_class.shape)
+                            accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
+
+                    print(f"Epoch {epoch + 1}/{epochs}.. "
+                          f"Train loss: {running_loss / print_every:.3f}.. "
+                          f"Test loss: {test_loss / len(capture_dataloader):.3f}.. "
+                          f"Test accuracy: {accuracy / len(capture_dataloader):.3f}")
+                    running_loss = 0
+                    model.train()
         pass
 
     def open_predict_window(self, button):

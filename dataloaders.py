@@ -2,7 +2,7 @@ import os
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
-from settings import PROCESSED_DIR, SHUFFLE_BATCH, RESIZE, USE_FMINST
+from settings import PROCESSED_DIR, SHUFFLE_BATCH, RESIZE, USE_FMINST, CAPTURE_DIR
 from transforms import HaarFaceDetect, HMAXTransform
 
 train_images = datasets.ImageFolder(
@@ -41,9 +41,22 @@ test_images = datasets.ImageFolder(
     ])
 )
 
+capture_images = datasets.ImageFolder(
+    os.path.join(CAPTURE_DIR),
+    transform=transforms.Compose([
+        HaarFaceDetect(),
+        HMAXTransform(),
+        transforms.Grayscale(),
+        transforms.Scale(RESIZE),
+        transforms.ToTensor(),
+        transforms.Lambda(lambda x: x * 255),
+    ])
+)
+
 train_dataloader = DataLoader(train_images, batch_size=10, shuffle=SHUFFLE_BATCH)
 validate_dataloader = DataLoader(validate_images, batch_size=10)
 test_dataloader = DataLoader(test_images, batch_size=10)
+capture_dataloader = DataLoader(capture_images, batch_size=2)
 
 # Fashion MNIST datasets
 if USE_FMINST:
@@ -54,5 +67,3 @@ if USE_FMINST:
 
     testset = datasets.FashionMNIST('~/.pytorch/F_MNIST_data/', download=True, train=False, transform=transform)
     test_dataloader = DataLoader(testset, batch_size=64, shuffle=True)
-
-

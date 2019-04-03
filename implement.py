@@ -83,7 +83,7 @@ for _ in range(epochs):
             print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(
                 valid_loss_min,
                 valid_loss))
-            torch.save(model.state_dict(), 'orl_database_faces.pt')
+            torch.save(network.state_dict(), 'orl_database_faces.pt')
             valid_loss_min = valid_loss
 
 plt.plot(train_losses, label='Training loss')
