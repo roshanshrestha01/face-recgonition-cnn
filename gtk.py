@@ -144,7 +144,7 @@ class FaceRecognitionWindow(Gtk.Window):
         model.load_state_dict(state_dict)
         for param in model.parameters():
             param.requires_grad = False
-        model.fc2 = nn.Linear(1024, 3)
+        model.fc2 = nn.Linear(1024, len(self.classes))
 
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.SGD(model.parameters(), lr=0.01)
