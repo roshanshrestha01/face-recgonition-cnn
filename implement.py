@@ -1,6 +1,6 @@
 import torch
 import pandas as pd
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, recall_score, accuracy_score, precision_score, f1_score, fbeta_score
 from torch import nn, optim
 import numpy as np
 import hmax
@@ -50,6 +50,13 @@ for _ in range(epochs):
         accuracy = 0
         confusion_matrix = torch.zeros(40, 40)
 
+        batch_recall = 0
+        batch_sklearn_accuracy = 0
+        batch_error_rate = 0
+        batch_precision = 0
+        batch_f1 = 0
+        batch_f1_beta = 0
+
         # Turn off gradients for validation, saves memory and computations
         with torch.no_grad():
             model.eval()
@@ -79,9 +86,19 @@ for _ in range(epochs):
         model.train()
         train_loss = running_loss / len(train_dataloader)
         valid_loss = validate_loss / len(validate_dataloader.dataset)
+
+        recall = 0
+        sklearn_accuracy = 0
+        error_rate = 0
+        precision = 0
+        f1 = 0
+        f1_beta = 0
+
+
         train_losses.append(train_loss)
         validate_losses.append(valid_loss)
         accuracy_data.append(accuracy / len(validate_dataloader))
+
         print("Epoch: {}/{}.. ".format(_, epochs),
               "Training Loss: {:.3f}.. ".format(running_loss / len(train_dataloader)),
               "Validate Loss: {:.3f}.. ".format(validate_loss / len(validate_dataloader)),
@@ -113,3 +130,10 @@ plt.show()
 
 # images = model(images)
 # log_ps = network(images.reshape(images.shape[0], 1, 8, 400))
+
+#
+# from sklearn.metrics import zero_one_score
+#
+# y_pred = svm.predict(test_samples)
+# accuracy = zero_one_score(y_test, y_pred)
+# error_rate = 1 - accuracy
