@@ -2,3 +2,4 @@ data
 .idea/
 *.pyc
 orl_database_faces.pt
+confusion-matrix.xlsx

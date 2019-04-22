@@ -1,4 +1,6 @@
+import io
 import torch
+from sklearn.metrics import confusion_matrix
 from torch import nn, optim
 import numpy as np
 import hmax
@@ -7,7 +9,7 @@ from networks import NNetwork, CNNetwork
 from settings import USE_FMINST, USE_HMAX_NETWORK, DEBUG, USE_CNN, DEBUG_EPOCHS_VIEW_IMAGE, RESIZE
 from utils import view_classify, show_batch, pprint_matrix
 from matplotlib import pyplot as plt
-
+import pandas as pd
 print('Constructing model')
 model = hmax.HMAX('./hmax/universal_patch_set.mat')
 
@@ -46,7 +48,7 @@ for _ in range(epochs):
     else:
         validate_loss = 0
         accuracy = 0
-        # confusion_matrix = torch.zeros(40, 40)
+        confusion_matrix = torch.zeros(40, 40)
 
         # Turn off gradients for validation, saves memory and computations
         with torch.no_grad():
@@ -55,9 +57,12 @@ for _ in range(epochs):
                 # HMAX c2 flattened feature vector input
                 log_ps = network(images)
                 validate_loss += criterion(log_ps, labels)
-                # _, preds = torch.max(log_ps, 1)
-                # for t, p in zip(labels.view(-1), preds.view(-1)):
-                #     confusion_matrix[t.long(), p.long()] += 1
+
+                # Append to confusion matrix
+                max_values, preds = torch.max(log_ps, 1)
+                for t, p in zip(labels.view(-1), preds.view(-1)):
+                    confusion_matrix[t.long(), p.long()] += 1
+
                 ps = torch.exp(log_ps)
                 top_p, top_class = ps.topk(1, dim=1)
                 equals = top_class == labels.view(*top_class.shape)
@@ -70,8 +75,6 @@ for _ in range(epochs):
                     s_top_p, s_top_class = s_ps.topk(1, dim=1)
                     verion = 'Fashion' if USE_FMINST else 'ORL'
                     view_classify(img, s_ps, verion)
-        # pprint_matrix(confusion_matrix.numpy())
-        # print('confusion_matrix', confusion_matrix)
 
         model.train()
         train_loss = running_loss / len(train_dataloader)
@@ -85,11 +88,14 @@ for _ in range(epochs):
               "Accuracy: {:.3f}".format(accuracy / len(validate_dataloader)))
 
         if valid_loss <= valid_loss_min:
-            # print('confusion_matrix_accuracy', confusion_matrix.diag() / confusion_matrix.sum(1))
-            print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(
+            print('Validation loss decreased ({:.6f} --> {:.6f}). Saving model ...'.format(
                 valid_loss_min,
                 valid_loss))
             torch.save(network.state_dict(), 'orl_database_faces.pt')
+            if _ > 40:
+                print('Saving confusion matrix ...')
+                df = pd.DataFrame(confusion_matrix.numpy())
+                df.to_excel('confusion-matrix.xlsx', index=False)
             valid_loss_min = valid_loss
 
 plt.plot(train_losses, label='Training loss')
