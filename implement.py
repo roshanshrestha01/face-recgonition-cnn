@@ -1,5 +1,5 @@
-import io
 import torch
+import pandas as pd
 from sklearn.metrics import confusion_matrix
 from torch import nn, optim
 import numpy as np
@@ -7,9 +7,9 @@ import hmax
 from dataloaders import train_dataloader, validate_dataloader
 from networks import NNetwork, CNNetwork
 from settings import USE_FMINST, USE_HMAX_NETWORK, DEBUG, USE_CNN, DEBUG_EPOCHS_VIEW_IMAGE, RESIZE
-from utils import view_classify, show_batch, pprint_matrix
+from utils import view_classify
 from matplotlib import pyplot as plt
-import pandas as pd
+
 print('Constructing model')
 model = hmax.HMAX('./hmax/universal_patch_set.mat')
 
