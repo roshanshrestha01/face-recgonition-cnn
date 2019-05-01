@@ -50,13 +50,8 @@ for _ in range(epochs):
         accuracy = 0
         confusion_matrix = torch.zeros(40, 40)
 
-        batch_recall = 0
-        batch_sklearn_accuracy = 0
-        batch_error_rate = 0
-        batch_precision = 0
-        batch_f1 = 0
-        batch_f1_beta = 0
-
+        prediction_arr = []
+        label_arr = []
         # Turn off gradients for validation, saves memory and computations
         with torch.no_grad():
             model.eval()
@@ -67,8 +62,12 @@ for _ in range(epochs):
 
                 # Append to confusion matrix
                 max_values, preds = torch.max(log_ps, 1)
-                for t, p in zip(labels.view(-1), preds.view(-1)):
+                y_pred = preds.view(-1)
+                for t, p in zip(labels.view(-1), y_pred):
                     confusion_matrix[t.long(), p.long()] += 1
+
+                prediction_arr.extend(y_pred)
+                label_arr.extend(labels)
 
                 ps = torch.exp(log_ps)
                 top_p, top_class = ps.topk(1, dim=1)
@@ -87,13 +86,11 @@ for _ in range(epochs):
         train_loss = running_loss / len(train_dataloader)
         valid_loss = validate_loss / len(validate_dataloader.dataset)
 
-        recall = 0
-        sklearn_accuracy = 0
-        error_rate = 0
-        precision = 0
-        f1 = 0
-        f1_beta = 0
-
+        recall = recall_score(label_arr, prediction_arr, average='macro')
+        sklearn_accuracy = accuracy_score(label_arr, prediction_arr)
+        precision = precision_score(label_arr, prediction_arr, average='macro')
+        f1 = f1_score(label_arr, prediction_arr, average='macro')
+        f1_beta = fbeta_score(label_arr, prediction_arr, average='macro', beta=0.5)
 
         train_losses.append(train_loss)
         validate_losses.append(valid_loss)
@@ -109,7 +106,18 @@ for _ in range(epochs):
                 valid_loss_min,
                 valid_loss))
             torch.save(network.state_dict(), 'orl_database_faces.pt')
-            if _ > 40:
+            if _ > 20:
+                print('Recall {:.3f}\n'
+                      'Accuracy {:.3f}\n'
+                      'Precision {:.3f}\n'
+                      'f1 {:.3f}\n'
+                      'f1 Beta {:.3f}\n'.format(
+                    recall,
+                    sklearn_accuracy,
+                    precision,
+                    f1,
+                    f1_beta,
+                ))
                 print('Saving confusion matrix ...')
                 df = pd.DataFrame(confusion_matrix.numpy())
                 df.to_excel('confusion-matrix.xlsx', index=False)
