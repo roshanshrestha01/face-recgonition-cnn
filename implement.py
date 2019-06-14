@@ -1,30 +1,22 @@
 import torch
 import pandas as pd
-from sklearn.metrics import confusion_matrix, recall_score, accuracy_score, precision_score, f1_score, fbeta_score
+from sklearn.metrics import recall_score, accuracy_score, precision_score, f1_score, fbeta_score
 from torch import nn, optim
 import numpy as np
-import hmax
 from dataloaders import train_dataloader, test_dataloader
 from networks import NNetwork, CNNetwork
-from settings import USE_FMINST, USE_HMAX_NETWORK, DEBUG, USE_CNN, DEBUG_EPOCHS_VIEW_IMAGE, RESIZE
+from settings import USE_FMINST, DEBUG, USE_CNN, DEBUG_EPOCHS_VIEW_IMAGE, RESIZE
 from utils import view_classify
 from matplotlib import pyplot as plt
 
 print('Constructing model')
-model = hmax.HMAX('./hmax/universal_patch_set.mat')
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 print('Running model on', device)
-model = model.to(device)
-count = 0
-
 epochs = 100
 
-if USE_HMAX_NETWORK:
-    network = model
-else:
-    network = CNNetwork() if USE_CNN else NNetwork()
+network = CNNetwork() if USE_CNN else NNetwork()
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(network.parameters(), lr=0.01)
@@ -54,7 +46,7 @@ for _ in range(epochs):
         label_arr = []
         # Turn off gradients for validation, saves memory and computations
         with torch.no_grad():
-            model.eval()
+            network.eval()
             for images, labels in test_dataloader:
                 # HMAX c2 flattened feature vector input
                 log_ps = network(images)
@@ -82,7 +74,7 @@ for _ in range(epochs):
                     verion = 'Fashion' if USE_FMINST else 'ORL'
                     view_classify(img, s_ps, verion)
 
-        model.train()
+        network.train()
         train_loss = running_loss / len(train_dataloader)
         valid_loss = validate_loss / len(test_dataloader.dataset)
 

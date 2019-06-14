@@ -16,7 +16,7 @@ SHUFFLE_BATCH = True
 SHOW_BATCHES = {
     'train': True,
     'validate': False,
-    'test': False,
+    'test': True,
 }
 
 DEBUG = False
