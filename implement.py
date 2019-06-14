@@ -4,7 +4,7 @@ from sklearn.metrics import confusion_matrix, recall_score, accuracy_score, prec
 from torch import nn, optim
 import numpy as np
 import hmax
-from dataloaders import train_dataloader, validate_dataloader
+from dataloaders import train_dataloader, test_dataloader
 from networks import NNetwork, CNNetwork
 from settings import USE_FMINST, USE_HMAX_NETWORK, DEBUG, USE_CNN, DEBUG_EPOCHS_VIEW_IMAGE, RESIZE
 from utils import view_classify
@@ -55,7 +55,7 @@ for _ in range(epochs):
         # Turn off gradients for validation, saves memory and computations
         with torch.no_grad():
             model.eval()
-            for images, labels in validate_dataloader:
+            for images, labels in test_dataloader:
                 # HMAX c2 flattened feature vector input
                 log_ps = network(images)
                 validate_loss += criterion(log_ps, labels)
@@ -84,7 +84,7 @@ for _ in range(epochs):
 
         model.train()
         train_loss = running_loss / len(train_dataloader)
-        valid_loss = validate_loss / len(validate_dataloader.dataset)
+        valid_loss = validate_loss / len(test_dataloader.dataset)
 
         recall = recall_score(label_arr, prediction_arr, average='macro')
         sklearn_accuracy = accuracy_score(label_arr, prediction_arr)
@@ -94,33 +94,32 @@ for _ in range(epochs):
 
         train_losses.append(train_loss)
         validate_losses.append(valid_loss)
-        accuracy_data.append(accuracy / len(validate_dataloader))
+        accuracy_data.append(accuracy / len(test_dataloader))
 
         print("Epoch: {}/{}.. ".format(_, epochs),
               "Training Loss: {:.3f}.. ".format(running_loss / len(train_dataloader)),
-              "Validate Loss: {:.3f}.. ".format(validate_loss / len(validate_dataloader)),
-              "Accuracy: {:.3f}".format(accuracy / len(validate_dataloader)))
+              "Validate Loss: {:.3f}.. ".format(validate_loss / len(test_dataloader)),
+              "Accuracy: {:.3f}".format(accuracy / len(test_dataloader)))
 
         if valid_loss <= valid_loss_min:
             print('Validation loss decreased ({:.6f} --> {:.6f}). Saving model ...'.format(
                 valid_loss_min,
                 valid_loss))
             torch.save(network.state_dict(), 'orl_database_faces.pt')
-            if _ > 20:
-                print('Recall {:.3f}\n'
-                      'Accuracy {:.3f}\n'
-                      'Precision {:.3f}\n'
-                      'f1 {:.3f}\n'
-                      'f1 Beta {:.3f}\n'.format(
-                    recall,
-                    sklearn_accuracy,
-                    precision,
-                    f1,
-                    f1_beta,
-                ))
-                print('Saving confusion matrix ...')
-                df = pd.DataFrame(confusion_matrix.numpy())
-                df.to_excel('confusion-matrix.xlsx', index=False)
+            print('Recall {:.3f}\n'
+                  'Accuracy {:.3f}\n'
+                  'Precision {:.3f}\n'
+                  'f1 {:.3f}\n'
+                  'f1 Beta {:.3f}\n'.format(
+                recall,
+                sklearn_accuracy,
+                precision,
+                f1,
+                f1_beta,
+            ))
+            print('Saving confusion matrix ...')
+            df = pd.DataFrame(confusion_matrix.numpy())
+            df.to_excel('confusion-matrix.xlsx', index=False)
             valid_loss_min = valid_loss
 
 plt.plot(train_losses, label='Training loss')
