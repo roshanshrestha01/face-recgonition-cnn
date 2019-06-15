@@ -1,5 +1,5 @@
-data/capture/
-data/processed/
+data/
+!data/raw
 .idea/
 *.pyc
 orl_database_faces.pt
