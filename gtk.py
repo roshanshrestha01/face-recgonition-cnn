@@ -10,7 +10,6 @@ from torch import nn, optim
 from torchvision import transforms
 from torch.autograd import Variable
 
-from gtk_dataloader import capture_dataloader
 from networks import NNetwork, CNNetwork
 from settings import HAAR_CASCADE, CAPTURE_DIR, ORL_TRAINED_MODEL, USE_CNN, RESIZE
 from utils import check_folder
@@ -139,6 +138,8 @@ class FaceRecognitionWindow(Gtk.Window):
         pass
 
     def training_model(self, button):
+        from gtk_dataloader import capture_dataloader
+
         model = CNNetwork() if USE_CNN else NNetwork()
         state_dict = torch.load(ORL_TRAINED_MODEL)
         model.load_state_dict(state_dict)
