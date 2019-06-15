@@ -50,4 +50,31 @@ python implement.py
 Trains model and output orl_databse_faces.pt when validation loss is decreased. Also gives confusion-matrix.xls.
 
 
+## GTK application
+
+GTK desktop application has major three button capture image, train and predict video
+
+### Capture Image
+Add subject name in input. This name is use as directory name and label to store captured iamges.
+
+Capture image button open up webcam input. Might have to change source
+opencv video source in settings.py.
+
+When video frame is open. Press "C" in keyboard with face is detected in video which store image in
+directory name set in subject name input box.
+
+### Train model
+
+Click Train model button which uses pretraind model orl_database_faces.pt and added new image from capture
+directory. After completion an alert is made.
+
+### Predict Video
+
+Clicking predict video opens up video frame. Whan face is detection prediction is done and label is
+written at top right corner of detected face.
+![Predit image](image/predit.png#center)
+
+
+
+
  

@@ -11,7 +11,7 @@ from torchvision import transforms
 from torch.autograd import Variable
 
 from networks import NNetwork, CNNetwork
-from settings import HAAR_CASCADE, CAPTURE_DIR, ORL_TRAINED_MODEL, USE_CNN, RESIZE
+from settings import HAAR_CASCADE, CAPTURE_DIR, ORL_TRAINED_MODEL, USE_CNN, RESIZE, VIDEO_SOURCE
 from utils import check_folder
 
 gi.require_version('Gtk', '3.0')
@@ -96,7 +96,7 @@ class FaceRecognitionWindow(Gtk.Window):
     def open_capture_image_window(self, button):
         subject_name = self.subject_name.get_text()
 
-        cap = cv2.VideoCapture(2)
+        cap = cv2.VideoCapture(VIDEO_SOURCE)
         count = 1
 
         while True:
