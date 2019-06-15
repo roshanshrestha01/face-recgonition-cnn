@@ -31,7 +31,7 @@ pip install -r requirements.txt
 
 Split data into test data and traing data set. Stores images in processed data with pass parameters.
 
-```angular2
+```bash
 python prepare.py 6 4
 ```
 
@@ -40,4 +40,14 @@ Above commands sets 6 images for training in train directory and 4 images for te
 
 ## Implement
 
-Running 
+Running train and validation of model.
+
+```bash 
+python implement.py
+```
+
+
+Trains model and output orl_databse_faces.pt when validation loss is decreased. Also gives confusion-matrix.xls.
+
+
+ 

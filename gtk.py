@@ -10,7 +10,7 @@ from torch import nn, optim
 from torchvision import transforms
 from torch.autograd import Variable
 
-from dataloaders import capture_dataloader
+from gtk_dataloader import capture_dataloader
 from networks import NNetwork, CNNetwork
 from settings import HAAR_CASCADE, CAPTURE_DIR, ORL_TRAINED_MODEL, USE_CNN, RESIZE
 from utils import check_folder
