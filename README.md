@@ -72,6 +72,9 @@ directory. After completion an alert is made.
 
 Clicking predict video opens up video frame. Whan face is detection prediction is done and label is
 written at top right corner of detected face.
+
+
+
 ![Predit image](image/predit.png#center)
 
 
