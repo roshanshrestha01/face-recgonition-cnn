@@ -25,20 +25,24 @@ test_images = datasets.ImageFolder(
     ])
 )
 
-capture_images = datasets.ImageFolder(
-    os.path.join(CAPTURE_DIR),
-    transform=transforms.Compose([
-        HaarFaceDetect(),
-        transforms.Grayscale(),
-        transforms.Scale(RESIZE),
-        transforms.ToTensor(),
-        transforms.Lambda(lambda x: x * 255),
-    ])
-)
+try:
+    capture_images = datasets.ImageFolder(
+        os.path.join(CAPTURE_DIR),
+        transform=transforms.Compose([
+            HaarFaceDetect(),
+            transforms.Grayscale(),
+            transforms.Scale(RESIZE),
+            transforms.ToTensor(),
+            transforms.Lambda(lambda x: x * 255),
+        ])
+    )
+except:
+    pass
+else:
+    capture_dataloader = DataLoader(capture_images, batch_size=10)
 
 train_dataloader = DataLoader(train_images, batch_size=10, shuffle=SHUFFLE_BATCH)
 test_dataloader = DataLoader(test_images, batch_size=10)
-capture_dataloader = DataLoader(capture_images, batch_size=10)
 
 # Fashion MNIST datasets
 if USE_FMINST:
